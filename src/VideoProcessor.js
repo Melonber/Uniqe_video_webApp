@@ -30,19 +30,18 @@ const VideoProcessor = () => {
     await ffmpeg.FS("writeFile", "video1.mp4", await fetchFile(video1));
     await ffmpeg.FS("writeFile", "video2.mp4", await fetchFile(video2));
 
-    // Combine the videos vertically and resize them to 9:16 ratio
+        // Combine the videos vertically and resize them to 9:16 ratio
     await ffmpeg.run(
-      "-i", "video1.mp4", 
-      "-i", "video2.mp4", 
-      "-filter_complex", "[0:v]scale=720:1280,setsar=1[v1]; [1:v]scale=720:1280,setsar=1[v2]; [v1][v2]vstack=inputs=2[v]",
-      "-map", "[v]",
-      "-c:v", "libx264", 
-      "-crf", "23", 
-      "-preset", "fast",
-      "-t", "6", // Adjust duration (6 seconds in this case)
-      "output.mp4"
+    "-i", "video1.mp4", 
+    "-i", "video2.mp4", 
+    "-filter_complex", "[0:v]scale=1080:1920,setsar=1[v1]; [1:v]scale=1080:1920,setsar=1[v2]; [v1][v2]vstack=inputs=2[v]",
+    "-map", "[v]",
+    "-c:v", "libx264", 
+    "-crf", "23", 
+    "-preset", "fast",
+    "-t", "6", // Adjust duration (6 seconds in this case)
+    "output.mp4"
     );
-
     const outputFile = ffmpeg.FS("readFile", "output.mp4");
     const outputBlob = new Blob([outputFile.buffer], { type: "video/mp4" });
     const outputUrl = URL.createObjectURL(outputBlob);
@@ -52,8 +51,10 @@ const VideoProcessor = () => {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(to bottom right, #e0f2fe, #6366f1)", padding: "2rem" }}>
-      <div style={{ maxWidth: "48rem", margin: "0 auto", background: "#fff", borderRadius: "1rem", boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", padding: "2rem" }}>
+      <div style={{ minHeight: "100vh", background: "linear-gradient(to bottom right, #e0f2fe, #6366f1)", padding: "2rem" }}>
+
+          <div style={{ maxWidth: "48rem", margin: "0 auto", background: "#fff", borderRadius: "1rem", boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", padding: "2rem" }}>
+              
         <h1 style={{ fontSize: "2rem", fontWeight: "bold", textAlign: "center", marginBottom: "2rem", color: "#4b5563" }}>
           Уникализировать видео
         </h1>
@@ -62,7 +63,7 @@ const VideoProcessor = () => {
           <div style={{ display: "grid", gap: "1.5rem", gridTemplateColumns: "1fr 1fr" }}>
             <div style={{ position: "relative" }}>
               <label style={{ fontSize: "0.875rem", fontWeight: "500", color: "#6b7280", marginBottom: "0.5rem" }}>
-                Видео, которое будет сверху:
+                <p>Видео, которое будет сверху:</p>
               </label>
               <div style={{ position: "relative", border: "2px dashed #d1d5db", borderRadius: "0.75rem", padding: "1.5rem", cursor: "pointer", transition: "border-color 0.3s", textAlign: "center" }}>
                 <input
@@ -74,7 +75,7 @@ const VideoProcessor = () => {
                 <div>
                   <Upload style={{ height: "3rem", width: "3rem", color: "#9ca3af", marginBottom: "0.5rem" }} />
                   <p style={{ fontSize: "0.875rem", color: "#6b7280" }}>
-                    {video1 ? "Видео 1 загружено" : "Загрузить 1 видео"}
+                    {video1 ? "Первое видео загружено" : "Загрузить первое видео"}
                   </p>
                 </div>
               </div>
@@ -82,7 +83,7 @@ const VideoProcessor = () => {
 
             <div style={{ position: "relative" }}>
               <label style={{ fontSize: "0.875rem", fontWeight: "500", color: "#6b7280", marginBottom: "0.6rem" }}>
-                Видео, которое будет снизу:
+                 <p>Видео, которое будет снизу:</p>
               </label>
               <div style={{ position: "relative", border: "2px dashed #d1d5db", borderRadius: "0.75rem", padding: "1.5rem", cursor: "pointer", transition: "border-color 0.3s", textAlign: "center" }}>
                 <input
@@ -94,7 +95,7 @@ const VideoProcessor = () => {
                 <div>
                   <Upload style={{ height: "3rem", width: "3rem", color: "#9ca3af", marginBottom: "0.5rem" }} />
                   <p style={{ fontSize: "0.875rem", color: "#6b7280" }}>
-                    {video2 ? "Видео 2 загружено" : "Загрузить 2 видео"}
+                    {video2 ? "Второе видео загружено" : "Загрузить второе видео"}
                   </p>
                 </div>
               </div>
