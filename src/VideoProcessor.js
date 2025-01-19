@@ -1,18 +1,25 @@
 import React, { useState } from "react";
 import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 import { Upload, Loader2 } from "lucide-react";
+import ResolutionSelector from "./ResolutionSelector";
+
 
 const VideoProcessor = () => {
   const [video1, setVideo1] = useState(null);
   const [video2, setVideo2] = useState(null);
   const [outputVideo, setOutputVideo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [resolution, setResolution] = useState("1080x1920"); // Default resolution
 
   const handleFileChange = (e, setVideo) => {
     const file = e.target.files[0];
     if (file) {
       setVideo(URL.createObjectURL(file));
     }
+  };
+
+  const handleResolutionChange = (e) => {
+    setResolution(e.target.value);
   };
 
   const processVideos = async () => {
@@ -30,18 +37,22 @@ const VideoProcessor = () => {
     await ffmpeg.FS("writeFile", "video1.mp4", await fetchFile(video1));
     await ffmpeg.FS("writeFile", "video2.mp4", await fetchFile(video2));
 
-        // Combine the videos vertically and resize them to 9:16 ratio
+    // Extract width and height from resolution
+    const [width, height] = resolution.split("x");
+
+    // Combine the videos vertically and resize them
     await ffmpeg.run(
-    "-i", "video1.mp4", 
-    "-i", "video2.mp4", 
-    "-filter_complex", "[0:v]scale=1080:1920,setsar=1[v1]; [1:v]scale=1080:1920,setsar=1[v2]; [v1][v2]vstack=inputs=2[v]",
-    "-map", "[v]",
-    "-c:v", "libx264", 
-    "-crf", "23", 
-    "-preset", "fast",
-    "-t", "6", // Adjust duration (6 seconds in this case)
-    "output.mp4"
+      "-i", "video1.mp4",
+      "-i", "video2.mp4",
+      "-filter_complex",
+      `[0:v]scale=${width}:${height},setsar=1[v1]; [1:v]scale=${width}:${height},setsar=1[v2]; [v1][v2]vstack=inputs=2[v]`,
+      "-map", "[v]",
+      "-c:v", "libx264",
+      "-crf", "23",
+      "-preset", "fast",
+      "output.mp4"
     );
+
     const outputFile = ffmpeg.FS("readFile", "output.mp4");
     const outputBlob = new Blob([outputFile.buffer], { type: "video/mp4" });
     const outputUrl = URL.createObjectURL(outputBlob);
@@ -50,11 +61,17 @@ const VideoProcessor = () => {
     setLoading(false);
   };
 
+
+
+
+  
   return (
       <div style={{ minHeight: "100vh", background: "linear-gradient(to bottom right, #e0f2fe, #6366f1)", padding: "2rem" }}>
 
           <div style={{ maxWidth: "48rem", margin: "0 auto", background: "#fff", borderRadius: "1rem", boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", padding: "2rem" }}>
               
+
+
         <h1 style={{ fontSize: "2rem", fontWeight: "bold", textAlign: "center", marginBottom: "2rem", color: "#4b5563" }}>
           Уникализировать видео
         </h1>
@@ -102,7 +119,18 @@ const VideoProcessor = () => {
             </div>
           </div>
 
+          
+    <div style={{ display: "flex", justifyContent: "center" }}>
+      <ResolutionSelector
+        resolution={resolution}
+        handleResolutionChange={handleResolutionChange}
+      />
+    </div>
+
+
+
           <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
+            
 <button
         onClick={processVideos}
         disabled={loading || !video1 || !video2}
@@ -166,7 +194,11 @@ const VideoProcessor = () => {
         </div>
       </div>
     </div>
+    
   );
+
+
 };
+
 
 export default VideoProcessor;
